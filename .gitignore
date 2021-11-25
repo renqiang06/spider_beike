@@ -1,4 +1,5 @@
 .vscode
+__pycache__/
 00backup/
 output/
 sendMsg.py
