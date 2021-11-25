@@ -3,7 +3,6 @@
 __author__ = 'Ren Qiang'
 # %% 爬取贝壳数据
 
-
 import requests
 from lxml import etree
 import json
@@ -19,7 +18,7 @@ def run():
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Safari/537.36', }
 
     try:
-        result = pd.read_excel("./spider_beike.xlsx", sheet_name='beike',
+        result = pd.read_excel("./output/spider_beike.xlsx", sheet_name='beike',
                                index_col=0)  # 读取excel数据文件
     except:
         result = pd.DataFrame(columns=[
@@ -27,7 +26,8 @@ def run():
             'year', 'area', 'roomType', 'direction', 'totalPrice', 'meterPrice',
             'followers', 'publishDate', 'maidianDetail', 'goodhouse_tag', 'href', 'dataAction'])
 
-    Msg = ''
+    Msg_new = '当日新增房源：\n'
+    Msg_chg = '当日改价房源：\n'
     city = 'sh'
     dict_districts = {'pd': ['nanmatou'], 'jd': ['waigang', 'anting']}
     regions = list(dict_districts.keys())
@@ -129,28 +129,27 @@ def run():
                     if temp['housedel_id'] in list(result[result['time'] == temp['time']]['housedel_id']):
                         # 当日重复房源，直接跳过
                         continue
-                    if temp['housedel_id']  in list(result['housedel_id']):
+                    if temp['housedel_id'] not in list(result['housedel_id']):
                         # 历史新增房源，需记录
-                        Msg = Msg + \
-                            '\n 当日新增房源：\n {district}/\t{address}:\n{area}/\t{roomType}/\t{totalPrice}/\t{meterPrice} \n {href} \n'.format_map(
+                        Msg_new = Msg_new + \
+                            '\n {district}/\t{address}:\n{area}/\t{roomType}/\t{totalPrice}/\t{meterPrice} \n {href} \n'.format_map(
                                 temp)
-                        sendMsg.send(Msg)  # 测试用
+                        # sendMsg.send(Msg_new)  # 测试用
                     elif temp['totalPrice'] != list(result[result['housedel_id'] == temp['housedel_id']]['totalPrice'])[-1]:
                         # 价格变动
                         temp['totalPrice_h'] = str(
                             list(result[result['housedel_id'] == temp['housedel_id']]['totalPrice']))
-                        Msg = Msg + \
-                            '\n 当日改价房源：\n {district}/\t{address}:\n{area}/\t{roomType}/\t{totalPrice_h}→{totalPrice}/\t{meterPrice} \n {href} \n'.format_map(
+                        Msg_chg = Msg_chg + \
+                            '\n {district}/\t{address}:\n{area}/\t{roomType}/\t{totalPrice_h}→{totalPrice}/\t{meterPrice} \n {href} \n'.format_map(
                                 temp)
-                        # sendMsg.send(Msg)  # 测试用
+                        # sendMsg.send(Msg_chg)  # 测试用
                     result = result.append(temp, ignore_index=True)
 
                 time.sleep(random.randint(8, 16))
     # result.drop_duplicates(['time','housedel_id'],keep='first')
     result.to_excel(excel_writer='./output/spider_beike.xlsx',
                     sheet_name='beike')
-
-    sendMsg.send(Msg)
+    sendMsg.send(Msg_new+'\n'*2+'~'*20+'\n'*2+Msg_chg)
     # print(result, len(result))
 
 
