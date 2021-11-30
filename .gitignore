@@ -1,8 +1,11 @@
 .vscode
+.idea/
 __pycache__/
 00backup/
 output/
+debug.log
 sendMsg.py
 spider_beike.pbix
 spider_beike.xlsx
 test.py
+*.html

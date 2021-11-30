@@ -26,8 +26,8 @@ def run():
             'year', 'area', 'roomType', 'direction', 'totalPrice', 'meterPrice',
             'followers', 'publishDate', 'maidianDetail', 'goodhouse_tag', 'href', 'dataAction'])
 
-    Msg_new = '当日新增房源：\n'
-    Msg_chg = '当日改价房源：\n'
+    msg_new = '当日新增房源：\n'
+    msg_chg = '当日改价房源：\n'
     city = 'sh'
     dict_districts = {'pd': ['nanmatou'], 'jd': ['waigang', 'anting']}
     regions = list(dict_districts.keys())
@@ -35,16 +35,16 @@ def run():
     for region in regions:
         for district in dict_districts[region]:
             print(district)
-            url_getPageNum = 'https://{0}.ke.com/ershoufang/{1}'.format(
+            url_get_page_num = 'https://{0}.ke.com/ershoufang/{1}'.format(
                 city, district)
 
-            resp = requests.get(url=url_getPageNum, headers=headers).text
+            resp = requests.get(url=url_get_page_num, headers=headers).text
             _element = etree.HTML(resp)
             page = json.loads(_element.xpath(
                 '//div[@class="page-box house-lst-page-box"]/@page-data')[0])["totalPage"]
             print(page)
             for i in range(page):
-                url = '{0}/pg{1}/'.format(url_getPageNum, i+1)
+                url = '{0}/pg{1}/'.format(url_get_page_num, i+1)
                 print(url)
                 resp = requests.get(url=url, headers=headers).text
                 _element = etree.HTML(resp)
@@ -131,25 +131,25 @@ def run():
                         continue
                     if temp['housedel_id'] not in list(result['housedel_id']):
                         # 历史新增房源，需记录
-                        Msg_new = Msg_new + \
+                        msg_new = msg_new + \
                             '\n {district}/\t{address}:\n{area}/\t{roomType}/\t{totalPrice}/\t{meterPrice} \n {href} \n'.format_map(
                                 temp)
-                        # sendMsg.send(Msg_new)  # 测试用
+                        # sendMsg.send(msg_new)  # 测试用
                     elif temp['totalPrice'] != list(result[result['housedel_id'] == temp['housedel_id']]['totalPrice'])[-1]:
                         # 价格变动
                         temp['totalPrice_h'] = str(
                             list(result[result['housedel_id'] == temp['housedel_id']]['totalPrice']))
-                        Msg_chg = Msg_chg + \
+                        msg_chg = msg_chg + \
                             '\n {district}/\t{address}:\n{area}/\t{roomType}/\t{totalPrice_h}→{totalPrice}/\t{meterPrice} \n {href} \n'.format_map(
                                 temp)
-                        # sendMsg.send(Msg_chg)  # 测试用
+                        # sendMsg.send(msg_chg)  # 测试用
                     result = result.append(temp, ignore_index=True)
 
                 time.sleep(random.randint(8, 16))
     # result.drop_duplicates(['time','housedel_id'],keep='first')
     result.to_excel(excel_writer='./output/spider_beike.xlsx',
                     sheet_name='beike')
-    sendMsg.send(Msg_new+'\n'*2+'~'*20+'\n'*2+Msg_chg)
+    sendMsg.send(msg_new+'\n'*2+'~'*20+'\n'*2+msg_chg)
     # print(result, len(result))
 
 
