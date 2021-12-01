@@ -11,7 +11,7 @@ import re
 import random
 import pandas as pd
 import sendMsg
-
+import plot
 
 def run():
     headers = {
@@ -30,6 +30,7 @@ def run():
     msg_chg = '当日改价房源：\n'
     city = 'sh'
     dict_districts = {'pd': ['nanmatou'], 'jd': ['waigang', 'anting']}
+    # dict_districts = {'pd': ['nanmatou']}
     regions = list(dict_districts.keys())
 
     for region in regions:
@@ -149,9 +150,9 @@ def run():
     # result.drop_duplicates(['time','housedel_id'],keep='first')
     result.to_excel(excel_writer='./output/spider_beike.xlsx',
                     sheet_name='beike')
+    plot.plot_msg()
     sendMsg.send(msg_new+'\n'*2+'~'*20+'\n'*2+msg_chg)
     # print(result, len(result))
-
 
 if __name__ == '__main__':
     # 启动
