@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 __author__ = 'Ren Qiang'
-# %% 爬取贝壳数据
-
+# %% 爬取贝壳数据 
+# s
 import requests
 from lxml import etree
 import json
