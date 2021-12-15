@@ -1,8 +1,10 @@
-.vscode
-.idea/
 __pycache__/
+.history/
+.idea/
+.vscode/
 00backup/
 output/
+.gitignore
 debug.log
 sendMsg.py
 spider_beike.pbix

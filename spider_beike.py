@@ -60,7 +60,7 @@ def run():
                     _dataActions = temp['dataAction'].split("&")
                     for _aa in _dataActions:
                         if 'housedel_id' in _aa:
-                            temp['housedel_id'] = int(_aa.split('=')[1])
+                            temp['housedel_id'] = str(_aa.split('=')[1])
                     try:
                         temp['goodhouse_tag'] = tag.xpath(
                             './div[1]/span/text()')[0]
@@ -151,7 +151,10 @@ def run():
     result.to_excel(excel_writer='./output/spider_beike.xlsx',
                     sheet_name='beike')
     plot.plot_msg()
-    sendMsg.send(msg_new+'\n'*2+'~'*20+'\n'*2+msg_chg)
+    txt = msg_new+'\n'*2+'~'*20+'\n'*2+msg_chg
+    with open('./output/sendtxt.txt', 'w') as f:
+        f.write('\n------\n{0}\n------\n'.format(txt))
+    sendMsg.send(txt)
     # print(result, len(result))
 
 if __name__ == '__main__':
