@@ -12,6 +12,7 @@ import random
 import pandas as pd
 import sendMsg
 import plot
+import itertools
 
 def run():
     headers = {
@@ -127,19 +128,19 @@ def run():
                     temp['region'] = region
                     temp['district'] = district
                     temp['time'] = time.strftime("%Y/%m/%d", time.localtime())
-                    if temp['housedel_id'] in list(result[result['time'] == temp['time']]['housedel_id']):
+                    if int(temp['housedel_id']) in list(result[result['time'] == temp['time']]['housedel_id']):
                         # 当日重复房源，直接跳过
                         continue
-                    if temp['housedel_id'] not in list(result['housedel_id']):
+                    if int(temp['housedel_id']) not in list(result['housedel_id']):
                         # 历史新增房源，需记录
                         msg_new = msg_new + \
                             '\n {district}/\t{address}:\n{area}/\t{roomType}/\t{totalPrice}/\t{meterPrice} \n {href} \n'.format_map(
                                 temp)
                         # sendMsg.send(msg_new)  # 测试用
-                    elif temp['totalPrice'] != list(result[result['housedel_id'] == temp['housedel_id']]['totalPrice'])[-1]:
+                    elif temp['totalPrice'] != list(result[result['housedel_id'] == int(temp['housedel_id'])]['totalPrice'])[-1]:
                         # 价格变动
-                        temp['totalPrice_h'] = str(
-                            list(result[result['housedel_id'] == temp['housedel_id']]['totalPrice']))
+                        _totalPrice_h = list(result[result['housedel_id'] == int(temp['housedel_id'])]['totalPrice'])
+                        temp['totalPrice_h'] = str([k for k, _ in itertools.groupby(_totalPrice_h)])
                         msg_chg = msg_chg + \
                             '\n {district}/\t{address}:\n{area}/\t{roomType}/\t{totalPrice_h}→{totalPrice}/\t{meterPrice} \n {href} \n'.format_map(
                                 temp)
