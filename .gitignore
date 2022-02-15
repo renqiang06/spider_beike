@@ -10,4 +10,6 @@ sendMsg.py
 spider_beike.pbix
 spider_beike.xlsx
 test.py
+spider_beike_onefile.py
+*.bat
 *.html
