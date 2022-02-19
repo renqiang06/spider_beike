@@ -7,7 +7,7 @@ city = 'sh'
 dict_districts = {'pd': ['nanmatou'], 'jd': ['waigang', 'anting']}
 ```
 
-* 获取房源基本信息
+* 获取房源的基本信息
 
   ```python
   ['time', 'city', 'region', 'district', 'address', 'housedel_id', 'floor', 'totalFloor',
