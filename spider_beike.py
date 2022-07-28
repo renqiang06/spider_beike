@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 __author__ = 'Ren Qiang'
-# %% 爬取贝壳数据 
+# %% 爬取贝壳数据
 # s
 import requests
 from lxml import etree
@@ -13,6 +13,7 @@ import pandas as pd
 import sendMsg
 import plot
 import itertools
+
 
 def run():
     headers = {
@@ -30,7 +31,7 @@ def run():
     msg_new = '当日新增房源：\n'
     msg_chg = '当日改价房源：\n'
     city = 'sh'
-    dict_districts = {'pd': ['nanmatou'], 'jd': ['waigang', 'anting']}
+    dict_districts = {'pd': ['nanmatou','zhoupu','kangqiao','hangtou'], 'jd': ['waigang', 'anting']}
     # dict_districts = {'pd': ['nanmatou']}
     regions = list(dict_districts.keys())
 
@@ -61,7 +62,8 @@ def run():
                     _dataActions = temp['dataAction'].split("&")
                     for _aa in _dataActions:
                         if 'housedel_id' in _aa:
-                            temp['housedel_id'] = str(_aa.split('=')[1])
+                            temp['housedel_id'] = "'" + \
+                                str(_aa.split('=')[1])+"'"
                     try:
                         temp['goodhouse_tag'] = tag.xpath(
                             './div[1]/span/text()')[0]
@@ -116,8 +118,12 @@ def run():
                         './div/div/span[@class="subway"]/text()')
 
                     # 房源价价格、单价
-                    _totalPrice = float(
-                        tag.xpath('./div[2]/div[5]/div[1]/span/text()')[0].replace(' ', ''))
+                    try:
+                        _totalPrice = float(
+                            tag.xpath('./div[2]/div[5]/div[1]/span/text()')[0].replace(' ', ''))
+                    except:
+                        if "暂无数据"==tag.xpath('./div[2]/div[5]/div[1]/span/text()')[0].replace(' ', ''):
+                            _totalPrice = 0.
                     _meterPrice = tag.xpath(
                         './div[2]/div[5]/div[2]/span/text()')[0]
                     _meterPrice = float(
@@ -128,19 +134,21 @@ def run():
                     temp['region'] = region
                     temp['district'] = district
                     temp['time'] = time.strftime("%Y/%m/%d", time.localtime())
-                    if int(temp['housedel_id']) in list(result[result['time'] == temp['time']]['housedel_id']):
+                    if temp['housedel_id'] in list(result[result['time'] == temp['time']]['housedel_id']):
                         # 当日重复房源，直接跳过
                         continue
-                    if int(temp['housedel_id']) not in list(result['housedel_id']):
+                    if temp['housedel_id'] not in list(result['housedel_id']):
                         # 历史新增房源，需记录
                         msg_new = msg_new + \
                             '\n {district}/\t{address}:\n{area}/\t{roomType}/\t{totalPrice}/\t{meterPrice} \n {href} \n'.format_map(
                                 temp)
                         # sendMsg.send(msg_new)  # 测试用
-                    elif temp['totalPrice'] != list(result[result['housedel_id'] == int(temp['housedel_id'])]['totalPrice'])[-1]:
+                    elif temp['totalPrice'] != list(result[result['housedel_id'] == temp['housedel_id']]['totalPrice'])[-1]:
                         # 价格变动
-                        _totalPrice_h = list(result[result['housedel_id'] == int(temp['housedel_id'])]['totalPrice'])
-                        temp['totalPrice_h'] = str([k for k, _ in itertools.groupby(_totalPrice_h)])
+                        _totalPrice_h = list(
+                            result[result['housedel_id'] == temp['housedel_id']]['totalPrice'])
+                        temp['totalPrice_h'] = str(
+                            [k for k, _ in itertools.groupby(_totalPrice_h)])
                         msg_chg = msg_chg + \
                             '\n {district}/\t{address}:\n{area}/\t{roomType}/\t{totalPrice_h}→{totalPrice}/\t{meterPrice} \n {href} \n'.format_map(
                                 temp)
@@ -157,6 +165,7 @@ def run():
         f.write('\n------\n{0}\n------\n'.format(txt))
     sendMsg.send(txt)
     # print(result, len(result))
+
 
 if __name__ == '__main__':
     # 启动
